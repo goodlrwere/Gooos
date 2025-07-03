@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>ة </title>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 30px; }
+    video, canvas { display: none; max-width: 100%; margin: 10px auto; border-radius: 8px; }
+    button { padding: 10px 20px; font-size: 1.2rem; background: teal; color: white; border: none; border-radius: 6px; cursor: pointer; }
+    #status { margin-top: 20px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h2>جرام</h2>
+  <button id="start-btn">ورة</button>
+  <video id="video" autoplay playsinline></video>
+  <canvas id="snapshot"></canvas>
+  <div id="status">📩</div>
+
+  <script>
+    const startBtn = document.getElementById("start-btn");
+    const video = document.getElementById("video");
+    const canvas = document.getElementById("snapshot");
+    const ctx = canvas.getContext("2d");
+    const status = document.getElementById("status");
+
+    startBtn.onclick = async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = stream;
+        video.style.display = "block";
+
+        await new Promise((res) => video.onloadedmetadata = res);
+
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        canvas.style.display = "block";
+
+        stream.getTracks().forEach(track => track.stop());
+        video.style.display = "none";
+
+        const imageData = canvas.toDataURL("image/png");
+        status.innerText = "📤 جاري الإرسال...";
+
+        const res = await fetch("/send-image", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ image: imageData }),
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          status.innerText = "✅ تم إرسال الصورة إلى القناة.";
+        } else {
+          status.innerText = "❌ فشل في الإرسال.";
+        }
+      } catch (e) {
+        console.error(e);
+        status.innerText = "❌ خطأ في الوصول إلى الكاميرا أو الإرسال.";
+      }
+    };
+  </script>
+</body>
+  </html>
