@@ -1,0 +1,14 @@
+{
+  "name": "telegram-photo-capture",
+  "version": "1.0.0",
+  "description": "إرسال صورة عبر تيليجرام",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "express": "^4.18.2",
+    "form-data": "^4.0.0"
+  }
+}
